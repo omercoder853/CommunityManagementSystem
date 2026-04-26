@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Duyuru Oluştur{% endblock %}
+{% block extra_css %}{{ form.media.css }}{% endblock %}
+
+{% block body %}
+<div class="page-container-sm">
+  {% if community %}
+  <a href="{% url 'community_detail' community.pk %}" class="btn btn-outline btn-sm" style="margin-bottom:1.5rem;">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> Topluluğa Dön
+  </a>
+  {% else %}
+  <a href="{% url 'announcement_list' %}" class="btn btn-outline btn-sm" style="margin-bottom:1.5rem;">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> Duyurulara Dön
+  </a>
+  {% endif %}
+
+  <div class="form-card">
+    <h1 style="font-size:1.3rem;font-weight:800;margin-bottom:.3rem;">
+      <i class="fa-solid fa-bullhorn" style="color:var(--primary)"></i> Yeni Duyuru
+    </h1>
+    {% if community %}
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1.75rem;">{{ community.name }}</p>
+    {% else %}
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1.75rem;">Genel duyuru oluştur.</p>
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">{{ form.title.label }}</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+      </div>
+      <div class="form-group">
+        <label class="form-label">{{ form.content.label }}</label>
+        {{ form.content }}
+      </div>
+      {% if not community %}
+      <div class="form-group" style="display:flex;align-items:center;gap:.5rem;">
+        {{ form.is_global }}
+        <label class="form-label" style="margin:0;cursor:pointer;">{{ form.is_global.label }}</label>
+      </div>
+      {% endif %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:.75rem;margin-top:.5rem;">
+        <i class="fa-solid fa-paper-plane"></i> Yayınla
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+document.querySelectorAll('input[type=text]').forEach(el => {
+  if (!el.classList.contains('form-control')) el.classList.add('form-control');
+});
+</script>
+{% endblock %}

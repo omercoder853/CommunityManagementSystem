@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Topluluklar{% endblock %}
+
+{% block body %}
+<div class="page-container">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+    <h1 class="section-title" style="margin-bottom:0;">
+      <i class="fa-solid fa-users" style="color:var(--primary)"></i> Topluluklar
+    </h1>
+    {% if user.is_authenticated and not user.is_advisor %}
+    <a href="{% url 'community_create_request' %}" class="btn btn-primary">
+      <i class="fa-solid fa-plus"></i> Topluluk Kur
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Search -->
+  <form method="get" style="margin-bottom:2rem;max-width:400px;">
+    <div class="search-bar">
+      <span class="search-bar-icon"><i class="fa-solid fa-magnifying-glass fa-sm"></i></span>
+      <input type="text" name="q" value="{{ query }}" placeholder="Topluluk ara...">
+    </div>
+  </form>
+
+  {% if communities %}
+  <div class="community-grid">
+    {% for comm in communities %}
+    <a href="{% url 'community_detail' comm.pk %}" class="community-card">
+      <div class="community-card-cover" style="background:linear-gradient(135deg,
+        hsl({{ forloop.counter0|add:230 }},70%,55%) 0%,
+        hsl({{ forloop.counter0|add:195 }},80%,52%) 100%);">
+        <div class="community-card-logo">
+          {% if comm.logo %}
+            <img src="{{ comm.logo.url }}" alt="{{ comm.name }}">
+          {% else %}
+            {{ comm.name|first|upper }}
+          {% endif %}
+        </div>
+      </div>
+      <div class="community-card-body">
+        <div class="community-card-name">{{ comm.name }}</div>
+        <div class="community-card-meta">
+          <span><i class="fa-solid fa-users fa-xs"></i> {{ comm.members.count }} Üye</span>
+          <span><i class="fa-solid fa-calendar fa-xs"></i> {{ comm.founded_date|date:"Y" }}</span>
+        </div>
+        <div style="margin-top:.75rem;display:flex;align-items:center;gap:.6rem;">
+          {% if comm.advisor %}
+            <span class="badge badge-primary"><i class="fa-solid fa-chalkboard-user fa-xs"></i> Danışman var</span>
+          {% endif %}
+          <span class="badge badge-success"><i class="fa-solid fa-circle fa-xs"></i> Aktif</span>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🏫</div>
+    <div class="empty-state-title">
+      {% if query %}Arama sonucu bulunamadı{% else %}Henüz topluluk yok{% endif %}
+    </div>
+    <div class="empty-state-desc">
+      {% if query %}Farklı bir kelimeyle dene.{% else %}İlk topluluğu sen kur!{% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Duyurular{% endblock %}
+
+{% block body %}
+<div class="page-container">
+  <h1 class="section-title">
+    <i class="fa-solid fa-bullhorn" style="color:var(--primary)"></i> Duyurular
+  </h1>
+
+  {% if announcements %}
+  <div class="announcement-list">
+    {% for ann in announcements %}
+    <a href="{% url 'announcement_detail' ann.pk %}" class="announcement-card" style="text-decoration:none;color:inherit;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <div class="announcement-title">{{ ann.title }}</div>
+          <div class="announcement-meta" style="margin-top:.3rem;">
+            <span><i class="fa-regular fa-clock fa-xs"></i> {{ ann.created_at|date:"d M Y" }}</span>
+            {% if ann.community %}<span><i class="fa-solid fa-users fa-xs"></i> {{ ann.community.name }}</span>{% endif %}
+            {% if ann.created_by %}<span><i class="fa-solid fa-user fa-xs"></i> {{ ann.created_by.get_full_name }}</span>{% endif %}
+          </div>
+        </div>
+        <div>
+          {% if ann.is_global %}
+            <span class="badge badge-primary">Genel</span>
+          {% elif ann.community %}
+            <span class="badge badge-neutral">Topluluk</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📢</div>
+    <div class="empty-state-title">Henüz duyuru yok</div>
+    <div class="empty-state-desc">Topluluklar duyuru paylaştığında burada görünecek.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

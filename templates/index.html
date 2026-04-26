@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block body %}
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">
+      <i class="fa-solid fa-sparkles fa-sm"></i> Üniversite Topluluk Platformu
+    </div>
+    <h1 class="hero-title">
+      Topluluğunu Yönet,<br>
+      <span style="opacity:.85;">Daha Fazlasını Başar</span>
+    </h1>
+    <p class="hero-subtitle">
+      Etkinlikler, üyelikler, duyurular ve gönüllülük işlemlerini tek panelden hızlıca yönet.
+    </p>
+    <div class="hero-cta">
+      {% if user.is_authenticated %}
+        <a href="{% url 'community_list' %}" class="btn-hero-primary">
+          <i class="fa-solid fa-users"></i> Topluluklara Gözat
+        </a>
+        <a href="{% url 'profile' %}" class="btn-hero-outline">
+          <i class="fa-solid fa-user"></i> Profilim
+        </a>
+      {% else %}
+        <a href="{% url 'register_choice' %}" class="btn-hero-primary">
+          Ücretsiz Kayıt Ol
+        </a>
+        <a href="{% url 'community_list' %}" class="btn-hero-outline">
+          <i class="fa-solid fa-magnifying-glass"></i> Toplulukları Keşfet
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-number" data-count="{{ community_count }}">{{ community_count }}</span>
+    <div class="stat-label">Aktif Topluluk</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number" data-count="{{ event_count }}">{{ event_count }}</span>
+    <div class="stat-label">Etkinlik</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-number" data-count="{{ member_count }}">{{ member_count }}</span>
+    <div class="stat-label">Üye</div>
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="page-container">
+
+  <!-- Recent Events -->
+  {% if recent_events %}
+  <div style="margin-bottom:3rem;">
+    <h2 class="section-title"><i class="fa-solid fa-calendar-days" style="color:var(--primary)"></i> Yaklaşan Etkinlikler</h2>
+    <div class="event-grid">
+      {% for event in recent_events %}
+      <a href="{% url 'event_detail' event.pk %}" class="event-card">
+        <div class="event-card-top">
+          <div class="event-date-block">
+            <div class="event-date-day">{{ event.event_date|date:"d" }}</div>
+            <div class="event-date-month">{{ event.event_date|date:"M" }}</div>
+          </div>
+          {% if event.location_type == 'online' %}
+            <span class="event-location-badge online"><i class="fa-solid fa-video fa-xs"></i> Online</span>
+          {% else %}
+            <span class="event-location-badge face"><i class="fa-solid fa-location-dot fa-xs"></i> Yüz Yüze</span>
+          {% endif %}
+        </div>
+        <div class="event-card-body">
+          <div class="event-card-title">{{ event.title }}</div>
+          <div class="event-card-comm"><i class="fa-solid fa-users fa-xs"></i> {{ event.community.name }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="{% url 'event_list' %}" class="btn btn-outline">Tüm Etkinlikler <i class="fa-solid fa-arrow-right fa-sm"></i></a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Recent Announcements -->
+  {% if recent_announcements %}
+  <div>
+    <h2 class="section-title"><i class="fa-solid fa-bullhorn" style="color:var(--primary)"></i> Son Duyurular</h2>
+    <div class="announcement-list">
+      {% for ann in recent_announcements %}
+      <a href="{% url 'announcement_detail' ann.pk %}" class="announcement-card" style="text-decoration:none;color:inherit;">
+        <div class="announcement-title">{{ ann.title }}</div>
+        <div class="announcement-meta">
+          <span><i class="fa-regular fa-clock fa-xs"></i> {{ ann.created_at|date:"d M Y" }}</span>
+          {% if ann.community %}<span><i class="fa-solid fa-users fa-xs"></i> {{ ann.community.name }}</span>{% endif %}
+          {% if ann.is_global %}<span class="badge badge-primary">Genel</span>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:1.5rem;">
+      <a href="{% url 'announcement_list' %}" class="btn btn-outline">Tüm Duyurular <i class="fa-solid fa-arrow-right fa-sm"></i></a>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not recent_events and not recent_announcements %}
+  <div class="empty-state">
+    <div class="empty-state-icon">🎓</div>
+    <div class="empty-state-title">Henüz içerik yok</div>
+    <div class="empty-state-desc">İlk topluluğu sen oluştur!</div>
+    {% if user.is_authenticated and not user.is_advisor %}
+    <div style="margin-top:1.5rem;">
+      <a href="{% url 'community_create_request' %}" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i> Topluluk Kur
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

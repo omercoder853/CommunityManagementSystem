@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CommHub | {% block title %}Üniversite Topluluk Yönetimi{% endblock %}</title>
+  <meta name="description" content="{% block meta_desc %}Üniversite topluluklarını kolayca yönet. Etkinlikler, üyelikler ve duyurular tek panelde.{% endblock %}">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Navbar ─────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+  <a href="{% url 'home' %}" class="navbar-brand">
+    <span>CommHub</span>
+    <span class="brand-dot"></span>
+  </a>
+
+  <ul class="navbar-nav">
+    <li>
+      <a href="{% url 'home' %}"
+         class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+        <i class="fa-solid fa-house fa-sm"></i> Ana Sayfa
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'community_list' %}"
+         class="nav-link {% if 'communit' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-users fa-sm"></i> Topluluklar
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'event_list' %}"
+         class="nav-link {% if 'event' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-calendar fa-sm"></i> Etkinlikler
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'announcement_list' %}"
+         class="nav-link {% if 'announcement' in request.path %}active{% endif %}">
+        <i class="fa-solid fa-bullhorn fa-sm"></i> Duyurular
+      </a>
+    </li>
+  </ul>
+
+  <div class="navbar-right">
+    {% if user.is_authenticated %}
+      <!-- Profile Dropdown (Custom) -->
+      <div class="profile-dropdown" id="profileDropdownWrapper">
+        <button class="profile-icon-btn" id="profileIconBtn" title="{{ user.get_full_name }}" aria-haspopup="true" aria-expanded="false">
+          <i class="fa-solid fa-user"></i>
+        </button>
+        <div class="profile-dropdown-menu" id="profileDropdownMenu" role="menu">
+          <div class="profile-dropdown-header">
+            <div class="profile-dropdown-avatar">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</div>
+            <div>
+              <div class="profile-dropdown-name">{{ user.get_full_name }}</div>
+              <div class="profile-dropdown-role">{% if user.is_advisor %}<i class="fa-solid fa-chalkboard-user fa-xs"></i> Danışman{% else %}<i class="fa-solid fa-graduation-cap fa-xs"></i> Öğrenci{% endif %}</div>
+            </div>
+          </div>
+          <div class="profile-dropdown-divider"></div>
+          <a href="{% url 'profile' %}" class="profile-dropdown-item">
+            <i class="fa-solid fa-user fa-sm"></i> Profilim
+          </a>
+          <a href="{% url 'profile_edit' %}" class="profile-dropdown-item">
+            <i class="fa-solid fa-pen fa-sm"></i> Düzenle
+          </a>
+          <div class="profile-dropdown-divider"></div>
+          <a href="{% url 'logout' %}" class="profile-dropdown-item profile-dropdown-item--danger">
+            <i class="fa-solid fa-right-from-bracket fa-sm"></i> Çıkış Yap
+          </a>
+        </div>
+      </div>
+    {% else %}
+      <a href="{% url 'login' %}" class="btn-nav-login">Giriş Yap</a>
+      <a href="{% url 'register_choice' %}" class="btn-nav-register">Kayıt Ol</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- ── Messages ───────────────────────────────────────────────────────────── -->
+{% if messages %}
+<div class="messages-container">
+  {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags|default:'info' }}" data-auto-dismiss>
+      {% if msg.tags == 'success' %}<i class="fa-solid fa-circle-check"></i>
+      {% elif msg.tags == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
+      {% elif msg.tags == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+      {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+      {{ msg }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── Page Content ───────────────────────────────────────────────────────── -->
+{% block body %}{% endblock %}
+
+<!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <p>© 2025 CommHub — Üniversite Topluluk Yönetim Sistemi</p>
+</footer>
+
+<!-- Main JS -->
+<script src="{% static 'scripts/main.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

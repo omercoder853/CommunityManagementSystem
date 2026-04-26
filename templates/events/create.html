@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Etkinlik Oluştur — {{ community.name }}{% endblock %}
+{% block extra_css %}{{ form.media.css }}{% endblock %}
+
+{% block body %}
+<div class="page-container-sm">
+  <a href="{% url 'community_detail' community.pk %}" class="btn btn-outline btn-sm" style="margin-bottom:1.5rem;">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> Topluluğa Dön
+  </a>
+  <div class="form-card">
+    <h1 style="font-size:1.3rem;font-weight:800;margin-bottom:.3rem;">
+      <i class="fa-solid fa-calendar-plus" style="color:var(--primary)"></i> Yeni Etkinlik
+    </h1>
+    <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1.75rem;">{{ community.name }}</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">{{ form.title.label }}</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ form.description.label }}</label>
+        {{ form.description }}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">{{ form.event_date.label }}</label>
+          {{ form.event_date }}
+          {% if form.event_date.errors %}<div class="form-error">{{ form.event_date.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.location_type.label }}</label>
+          {{ form.location_type }}
+          {% if form.location_type.errors %}<div class="form-error">{{ form.location_type.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group" id="meet-link-group">
+        <label class="form-label">{{ form.location_detail.label }}</label>
+        {{ form.location_detail }}
+        {% if form.location_detail.errors %}<div class="form-error">{{ form.location_detail.errors.0 }}</div>{% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:.75rem;margin-top:.5rem;">
+        <i class="fa-solid fa-calendar-check"></i> Etkinliği Oluştur
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ form.media.js }}
+<script>
+document.querySelectorAll('input[type=text], input[type=datetime-local], select').forEach(el => {
+  if (!el.classList.contains('form-control')) el.classList.add('form-control');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}{{ community.name }} — Topluluğu Sil{% endblock %}
+
+{% block body %}
+<div class="page-container-sm">
+
+  <a href="{% url 'community_detail' community.pk %}" class="back-link">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> {{ community.name }}
+  </a>
+
+  <div class="form-card" style="margin-top:1.5rem;border-left:4px solid var(--danger);">
+    <!-- Danger icon -->
+    <div style="text-align:center;padding:1rem 0 1.5rem;">
+      <div style="width:72px;height:72px;background:rgba(239,68,68,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size:2rem;color:var(--danger);"></i>
+      </div>
+      <h1 style="font-size:1.4rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;">Topluluğu Sil</h1>
+      <p style="font-size:.9rem;color:var(--text-secondary);max-width:420px;margin:0 auto;">
+        <strong style="color:var(--danger);">{{ community.name }}</strong> topluluğunu silmek istediğinizden emin misiniz?
+      </p>
+    </div>
+
+    <!-- What will be deleted -->
+    <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.75rem;">
+      <div style="font-size:.85rem;font-weight:700;color:var(--danger);margin-bottom:.75rem;">
+        <i class="fa-solid fa-trash fa-sm"></i> Silinecek kayıtlar:
+      </div>
+      <ul style="font-size:.85rem;color:var(--text-secondary);padding-left:1.2rem;line-height:2;">
+        <li>Tüm <strong>üyelikler</strong> ({{ community.members.count }} üye)</li>
+        <li>Tüm <strong>etkinlikler</strong> ({{ community.events.count }} etkinlik)</li>
+        <li>Tüm <strong>duyurular</strong> ({{ community.announcements.count }} duyuru)</li>
+        <li>Tüm bekleyen <strong>katılma talepleri</strong></li>
+        <li>Tüm <strong>görevli</strong> atamaları</li>
+      </ul>
+      <div style="font-size:.82rem;font-weight:600;color:var(--danger);margin-top:.75rem;">
+        <i class="fa-solid fa-exclamation-circle fa-xs"></i> Bu işlem geri alınamaz!
+      </div>
+    </div>
+
+    <form method="post" style="display:flex;gap:.75rem;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        <i class="fa-solid fa-trash"></i> Evet, Kalıcı Olarak Sil
+      </button>
+      <a href="{% url 'community_detail' community.pk %}" class="btn btn-outline">İptal</a>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

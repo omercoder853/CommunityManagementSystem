@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}{{ community.name }}{% endblock %}
+
+{% block body %}
+
+<!-- Detail Header -->
+<div class="detail-header">
+  <div class="detail-header-inner">
+    <div style="display:flex;align-items:flex-start;gap:1.5rem;flex-wrap:wrap;">
+      <div style="width:72px;height:72px;border-radius:16px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;flex-shrink:0;backdrop-filter:blur(8px);">
+        {% if community.logo %}
+          <img src="{{ community.logo.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">
+        {% else %}
+          {{ community.name|first|upper }}
+        {% endif %}
+      </div>
+      <div>
+        <h1 class="detail-title">{{ community.name }}</h1>
+        <div class="detail-meta">
+          {% if community.advisor %}
+            <span><i class="fa-solid fa-chalkboard-user fa-sm"></i> {{ community.advisor.get_full_name }}</span>
+          {% endif %}
+          {% if community.director %}
+            <span><i class="fa-solid fa-crown fa-sm"></i> {{ community.director.get_full_name }}</span>
+          {% endif %}
+          <span><i class="fa-solid fa-calendar fa-sm"></i> {{ community.founded_date|date:"d M Y" }}</span>
+          <span><i class="fa-solid fa-users fa-sm"></i> {{ community.members.count }} Üye</span>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+          {% if user.is_authenticated and not user.is_advisor %}
+            {% if is_member %}
+              {% if not is_director %}
+                <!-- Leave button -->
+                <a href="{% url 'leave_community' community.pk %}" class="btn btn-sm" style="background:rgba(239,68,68,.15);color:#fff;border:1px solid rgba(239,68,68,.4);">
+                  <i class="fa-solid fa-person-walking-arrow-right"></i> Ayrıl
+                </a>
+              {% else %}
+                <span class="badge badge-success" style="padding:.45rem 1rem;font-size:.8rem;">
+                  <i class="fa-solid fa-check"></i> Üyesiniz
+                </span>
+              {% endif %}
+            {% elif has_pending_join %}
+              <span class="badge badge-warning" style="padding:.45rem 1rem;font-size:.8rem;">
+                <i class="fa-solid fa-clock"></i> Talep Beklemede
+              </span>
+            {% elif not is_director %}
+              <a href="{% url 'join_community' community.pk %}" class="btn btn-primary btn-sm" style="background:#fff;color:var(--primary);">
+                <i class="fa-solid fa-user-plus"></i> Katıl
+              </a>
+            {% endif %}
+          {% endif %}
+          {% if is_director or is_advisor_of %}
+            <a href="{% url 'event_create' community.pk %}" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
+              <i class="fa-solid fa-calendar-plus"></i> Etkinlik Ekle
+            </a>
+            <a href="{% url 'announcement_create' community.pk %}" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
+              <i class="fa-solid fa-bullhorn"></i> Duyuru Ekle
+            </a>
+            <a href="{% url 'assign_staff' community.pk %}" class="btn btn-sm" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);">
+              <i class="fa-solid fa-user-gear"></i> Görev Ata
+            </a>
+            <!-- Edit & Delete -->
+            <a href="{% url 'community_edit' community.pk %}" class="btn btn-sm" style="background:rgba(255,255,255,.22);color:#fff;border:1px solid rgba(255,255,255,.45);">
+              <i class="fa-solid fa-pen-to-square"></i> Düzenle
+            </a>
+            <a href="{% url 'community_delete' community.pk %}" class="btn btn-sm" style="background:rgba(239,68,68,.3);color:#fff;border:1px solid rgba(239,68,68,.5);">
+              <i class="fa-solid fa-trash"></i> Sil
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Body -->
+<div class="detail-body">
+
+  <!-- Main Column -->
+  <div>
+    {% if community.description %}
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header"><i class="fa-solid fa-align-left fa-sm"></i> Hakkında</div>
+      <div class="card-body ck-content">{{ community.description|safe }}</div>
+    </div>
+    {% endif %}
+
+    <!-- Events -->
+    {% if events %}
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <span><i class="fa-solid fa-calendar fa-sm"></i> Yaklaşan Etkinlikler</span>
+        <a href="{% url 'event_list' %}" style="font-size:.8rem;color:var(--primary);">Tümü</a>
+      </div>
+      <div class="card-body" style="padding:0;">
+        {% for event in events %}
+        <a href="{% url 'event_detail' event.pk %}" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--border-light);transition:background var(--transition);" onmouseover="this.style.background='var(--bg-sidebar)'" onmouseout="this.style.background=''">
+          <div class="event-date-block">
+            <div class="event-date-day">{{ event.event_date|date:"d" }}</div>
+            <div class="event-date-month">{{ event.event_date|date:"M" }}</div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:.9rem;">{{ event.title }}</div>
+            <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem;">
+              {% if event.location_type == 'online' %}
+                <span class="event-location-badge online" style="font-size:.72rem;"><i class="fa-solid fa-video fa-xs"></i> Online</span>
+              {% else %}
+                <span class="event-location-badge face" style="font-size:.72rem;"><i class="fa-solid fa-location-dot fa-xs"></i> Yüz Yüze</span>
+              {% endif %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Announcements -->
+    {% if announcements %}
+    <div class="card">
+      <div class="card-header"><i class="fa-solid fa-bullhorn fa-sm"></i> Duyurular</div>
+      <div class="card-body" style="padding:0;">
+        {% for ann in announcements %}
+        <a href="{% url 'announcement_detail' ann.pk %}" style="display:block;padding:1rem 1.5rem;text-decoration:none;color:inherit;border-bottom:1px solid var(--border-light);transition:background var(--transition);" onmouseover="this.style.background='var(--bg-sidebar)'" onmouseout="this.style.background=''">
+          <div style="font-weight:600;font-size:.9rem;">{{ ann.title }}</div>
+          <div style="font-size:.78rem;color:var(--text-muted);margin-top:.2rem;">{{ ann.created_at|date:"d M Y" }}</div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sidebar -->
+  <div>
+
+    <!-- Staff -->
+    {% if staff %}
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-header"><i class="fa-solid fa-people-group fa-sm"></i> Yönetim Ekibi</div>
+      <div class="card-body">
+        <div class="member-list">
+          {% for s in staff %}
+          <div class="member-item">
+            <div class="member-avatar">{{ s.student.first_name|first }}{{ s.student.last_name|first }}</div>
+            <div>
+              <div class="member-name">{{ s.student.get_full_name }}</div>
+              <span class="badge task-{{ s.task }}" style="font-size:.7rem;">{{ s.get_task_display }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Members -->
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <span><i class="fa-solid fa-users fa-sm"></i> Üyeler</span>
+        <span class="badge badge-neutral">{{ community.members.count }}</span>
+      </div>
+      <div class="card-body">
+        {% if members %}
+        <div class="member-list">
+          {% for m in members|slice:":10" %}
+          <div class="member-item">
+            <div class="member-avatar">{{ m.student.first_name|first }}{{ m.student.last_name|first }}</div>
+            <div>
+              <div class="member-name">
+                {{ m.student.get_full_name }}
+                {% if m.student == community.director %}
+                  <span title="Başkan" style="color:var(--warning);font-size:.8rem;">👑</span>
+                {% endif %}
+              </div>
+              <div class="member-dept">{{ m.student.department|default:"-" }}</div>
+            </div>
+          </div>
+          {% endfor %}
+          {% if community.members.count > 10 %}
+          <p style="font-size:.8rem;color:var(--text-muted);text-align:center;padding-top:.5rem;">
+            +{{ community.members.count|add:"-10" }} daha fazla üye
+          </p>
+          {% endif %}
+        </div>
+        {% else %}
+        <p style="font-size:.875rem;color:var(--text-muted);">Henüz üye yok.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

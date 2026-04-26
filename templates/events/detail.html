@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block body %}
+<!-- Event Hero Header -->
+<div class="detail-header">
+  <div class="detail-header-inner">
+    <div style="margin-bottom:.75rem;">
+      <a href="{% url 'event_list' %}" style="color:rgba(255,255,255,.7);font-size:.875rem;text-decoration:none;">
+        <i class="fa-solid fa-arrow-left fa-sm"></i> Etkinlikler
+      </a>
+    </div>
+    <div style="display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
+      {% if event.location_type == 'online' %}
+        <span class="badge" style="background:rgba(6,182,212,.25);color:#fff;font-size:.8rem;">
+          <i class="fa-solid fa-video fa-xs"></i> Online
+        </span>
+      {% else %}
+        <span class="badge" style="background:rgba(16,185,129,.25);color:#fff;font-size:.8rem;">
+          <i class="fa-solid fa-location-dot fa-xs"></i> Yüz Yüze
+        </span>
+      {% endif %}
+      {% if not event.is_active %}
+        <span class="badge" style="background:rgba(0,0,0,.2);color:rgba(255,255,255,.7);font-size:.8rem;">Sona Erdi</span>
+      {% endif %}
+    </div>
+    <h1 class="detail-title">{{ event.title }}</h1>
+    <div class="detail-meta">
+      <span><i class="fa-solid fa-users fa-sm"></i> {{ event.community.name }}</span>
+      <span><i class="fa-regular fa-calendar fa-sm"></i> {{ event.event_date|date:"d M Y, H:i" }}</span>
+      {% if event.location_detail %}
+        <span><i class="fa-solid fa-map-pin fa-sm"></i> {{ event.location_detail }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="page-container" style="max-width:900px;">
+  <div style="display:grid;grid-template-columns:1fr 280px;gap:2rem;">
+
+    <!-- Description -->
+    <div>
+      <div class="card">
+        <div class="card-header"><i class="fa-solid fa-align-left fa-sm"></i> Etkinlik Açıklaması</div>
+        <div class="card-body ck-content">{{ event.description|safe }}</div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <div class="card">
+        <div class="card-header"><i class="fa-solid fa-circle-info fa-sm"></i> Detaylar</div>
+        <div class="card-body">
+          <dl style="display:flex;flex-direction:column;gap:.85rem;font-size:.875rem;">
+            <div>
+              <dt style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);">Topluluk</dt>
+              <dd><a href="{% url 'community_detail' event.community.pk %}" style="font-weight:600;">{{ event.community.name }}</a></dd>
+            </div>
+            <div>
+              <dt style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);">Tarih & Saat</dt>
+              <dd style="font-weight:600;">{{ event.event_date|date:"d M Y" }}<br>
+                <span style="color:var(--text-muted)">{{ event.event_date|date:"H:i" }}</span>
+              </dd>
+            </div>
+            <div>
+              <dt style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);">Tür</dt>
+              <dd>
+                {% if event.location_type == 'online' %}
+                  <span class="event-location-badge online"><i class="fa-solid fa-video fa-xs"></i> Online</span>
+                {% else %}
+                  <span class="event-location-badge face"><i class="fa-solid fa-location-dot fa-xs"></i> Yüz Yüze</span>
+                {% endif %}
+              </dd>
+            </div>
+            {% if event.location_detail %}
+            <div>
+              <dt style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);">
+                {% if event.location_type == 'online' %}Meet Linki{% else %}Konum{% endif %}
+              </dt>
+              <dd>
+                {% if event.location_type == 'online' %}
+                  <a href="{{ event.location_detail }}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-video"></i> Bağlan
+                  </a>
+                {% else %}
+                  {{ event.location_detail }}
+                {% endif %}
+              </dd>
+            </div>
+            {% endif %}
+            <div>
+              <dt style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);">Durum</dt>
+              <dd>
+                {% if event.is_active %}
+                  <span class="badge badge-success"><i class="fa-solid fa-circle fa-xs"></i> Aktif</span>
+                {% else %}
+                  <span class="badge badge-neutral">Sona Erdi</span>
+                {% endif %}
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

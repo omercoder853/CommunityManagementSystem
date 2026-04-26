@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}{{ community.name }} — Topluluktan Ayrıl{% endblock %}
+
+{% block body %}
+<div class="page-container-sm">
+
+  <a href="{% url 'community_detail' community.pk %}" class="back-link">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> {{ community.name }}
+  </a>
+
+  <div class="form-card" style="margin-top:1.5rem;border-left:4px solid var(--warning);">
+    <div style="text-align:center;padding:1rem 0 1.5rem;">
+      <div style="width:72px;height:72px;background:rgba(245,158,11,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i class="fa-solid fa-person-walking-arrow-right" style="font-size:2rem;color:var(--warning);"></i>
+      </div>
+      <h1 style="font-size:1.4rem;font-weight:800;color:var(--text-primary);margin-bottom:.5rem;">Topluluktan Ayrıl</h1>
+      <p style="font-size:.9rem;color:var(--text-secondary);max-width:380px;margin:0 auto;">
+        <strong>{{ community.name }}</strong> topluluğundan ayrılmak istediğinizden emin misiniz?
+      </p>
+    </div>
+
+    <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.25);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1.75rem;font-size:.875rem;color:var(--text-secondary);">
+      <i class="fa-solid fa-circle-info fa-sm" style="color:var(--warning);"></i>
+      Ayrıldıktan sonra tekrar katılmak için yeni bir üyelik talebi göndermeniz gerekir.
+    </div>
+
+    <form method="post" style="display:flex;gap:.75rem;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">
+        <i class="fa-solid fa-person-walking-arrow-right"></i> Ayrıl
+      </button>
+      <a href="{% url 'community_detail' community.pk %}" class="btn btn-outline">İptal</a>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

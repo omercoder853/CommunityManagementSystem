@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Kayıt Ol{% endblock %}
+
+{% block body %}
+<div class="auth-page" style="background:linear-gradient(135deg,#EEF2FF 0%,#F0FDFB 100%);min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:3rem 1rem;">
+  <div style="width:100%;max-width:560px;">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:.4rem;">Hesap Oluştur</h1>
+      <p style="color:var(--text-muted);font-size:.9rem;">Lütfen rolünüzü seçerek devam edin.</p>
+    </div>
+    <div class="role-choice-grid">
+      <a href="{% url 'register_student' %}" class="role-choice-card">
+        <div class="role-choice-icon student">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="role-choice-title">Öğrenci</div>
+        <div class="role-choice-desc">Topluluklara katıl veya yeni bir topluluk kur.</div>
+      </a>
+      <a href="{% url 'register_advisor' %}" class="role-choice-card">
+        <div class="role-choice-icon advisor">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div class="role-choice-title">Danışman</div>
+        <div class="role-choice-desc">Öğrenci topluluklarına danışman hoca olarak katıl.</div>
+      </a>
+    </div>
+    <p style="text-align:center;margin-top:1.75rem;font-size:.875rem;color:var(--text-muted);">
+      Zaten hesabın var mı?
+      <a href="{% url 'login' %}" style="font-weight:600;color:var(--primary);">Giriş Yap</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

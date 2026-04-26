@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Etkinlikler{% endblock %}
+
+{% block body %}
+<div class="page-container">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:2rem;">
+    <h1 class="section-title" style="margin-bottom:0;">
+      <i class="fa-solid fa-calendar-days" style="color:var(--primary)"></i> Etkinlikler
+    </h1>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="tabs" style="margin-bottom:2rem;">
+    <a href="?type=all" class="tab-btn {% if filter_type == 'all' %}active{% endif %}">Tümü</a>
+    <a href="?type=active" class="tab-btn {% if filter_type == 'active' %}active{% endif %}">
+      <i class="fa-solid fa-circle fa-xs" style="color:var(--success)"></i> Aktif
+    </a>
+    <a href="?type=past" class="tab-btn {% if filter_type == 'past' %}active{% endif %}">
+      <i class="fa-solid fa-clock-rotate-left fa-xs"></i> Geçmiş
+    </a>
+  </div>
+
+  {% if events %}
+  <div class="event-grid">
+    {% for event in events %}
+    <a href="{% url 'event_detail' event.pk %}" class="event-card">
+      <div class="event-card-top">
+        <div class="event-date-block">
+          <div class="event-date-day">{{ event.event_date|date:"d" }}</div>
+          <div class="event-date-month">{{ event.event_date|date:"M" }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;">
+          {% if event.location_type == 'online' %}
+            <span class="event-location-badge online"><i class="fa-solid fa-video fa-xs"></i> Online</span>
+          {% else %}
+            <span class="event-location-badge face"><i class="fa-solid fa-location-dot fa-xs"></i> Yüz Yüze</span>
+          {% endif %}
+          {% if not event.is_active %}
+            <span class="badge badge-neutral" style="font-size:.7rem;">Sona Erdi</span>
+          {% endif %}
+        </div>
+      </div>
+      <div class="event-card-body">
+        <div class="event-card-title">{{ event.title }}</div>
+        <div class="event-card-comm">
+          <i class="fa-solid fa-users fa-xs"></i> {{ event.community.name }}
+        </div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:.35rem;">
+          <i class="fa-regular fa-clock fa-xs"></i> {{ event.event_date|date:"H:i" }}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">📅</div>
+    <div class="empty-state-title">Etkinlik bulunamadı</div>
+    <div class="empty-state-desc">Henüz planlanmış bir etkinlik yok.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

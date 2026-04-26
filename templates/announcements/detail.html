@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}{{ announcement.title }}{% endblock %}
+
+{% block body %}
+<div class="page-container" style="max-width:800px;">
+  <a href="{% url 'announcement_list' %}" class="btn btn-outline btn-sm" style="margin-bottom:1.5rem;">
+    <i class="fa-solid fa-arrow-left fa-sm"></i> Duyurulara Dön
+  </a>
+  <div class="card">
+    <div class="card-header" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+      <h1 style="font-size:1.15rem;font-weight:700;margin:0;">{{ announcement.title }}</h1>
+      {% if announcement.is_global %}
+        <span class="badge badge-primary">Genel Duyuru</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div style="display:flex;gap:1.5rem;font-size:.8rem;color:var(--text-muted);margin-bottom:1.5rem;flex-wrap:wrap;">
+        <span><i class="fa-regular fa-clock fa-xs"></i> {{ announcement.created_at|date:"d M Y, H:i" }}</span>
+        {% if announcement.created_by %}<span><i class="fa-solid fa-user fa-xs"></i> {{ announcement.created_by.get_full_name }}</span>{% endif %}
+        {% if announcement.community %}<span><i class="fa-solid fa-users fa-xs"></i> <a href="{% url 'community_detail' announcement.community.pk %}">{{ announcement.community.name }}</a></span>{% endif %}
+      </div>
+      <div class="ck-content">{{ announcement.content|safe }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

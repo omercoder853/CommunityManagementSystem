@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Öğrenci Kaydı{% endblock %}
+
+{% block body %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div style="margin-bottom:1.75rem;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;background:rgba(79,70,229,.1);border-radius:12px;margin-bottom:1rem;">
+        <i class="fa-solid fa-graduation-cap" style="color:var(--primary);font-size:1.3rem;"></i>
+      </div>
+      <h1 class="auth-title">Öğrenci Kaydı</h1>
+      <p class="auth-subtitle">Bilgilerini doldur ve topluluklara katılmaya başla.</p>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">{{ form.first_name.label }}</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.last_name.label }}</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ form.username.label }}</label>
+        {{ form.username }}
+        {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ form.email.label }}</label>
+        {{ form.email }}
+        {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">{{ form.department.label }}</label>
+          {{ form.department }}
+          {% if form.department.errors %}<div class="form-error">{{ form.department.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.gender.label }}</label>
+          {{ form.gender }}
+          {% if form.gender.errors %}<div class="form-error">{{ form.gender.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ form.phone.label }}</label>
+        {{ form.phone }}
+      </div>
+
+      <div class="auth-divider">Şifre</div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">{{ form.password1.label }}</label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ form.password2.label }}</label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors.0 }}</div>{% endif %}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem;padding:.75rem;">
+        <i class="fa-solid fa-user-plus"></i> Kayıt Ol
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.25rem;font-size:.875rem;color:var(--text-muted);">
+      Zaten hesabın var mı?
+      <a href="{% url 'login' %}" style="font-weight:600;color:var(--primary);">Giriş Yap</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Style all form inputs
+document.querySelectorAll('input, select, textarea').forEach(el => {
+  if (!el.classList.contains('form-control')) el.classList.add('form-control');
+});
+</script>
+{% endblock %}
