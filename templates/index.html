@@ -7,17 +7,31 @@
 
 <!-- Hero -->
 <section class="hero">
+  <!-- Decorative Background Elements -->
+  <div class="hero-shape hero-shape-1"></div>
+  <div class="hero-shape hero-shape-2"></div>
+  <div class="hero-shape hero-shape-3"></div>
+  <div class="hero-cursor-glow"></div>
+
   <div class="hero-content">
     <div class="hero-badge">
-      <i class="fa-solid fa-sparkles fa-sm"></i> Üniversite Topluluk Platformu
+      <i class="fa-solid fa-sparkles fa-sm"></i> Yeni Nesil Üniversite Topluluk Platformu
     </div>
     <h1 class="hero-title">
       Topluluğunu Yönet,<br>
-      <span style="opacity:.85;">Daha Fazlasını Başar</span>
+      <span class="hero-title-highlight typing-effect">Daha Fazlasını Başar</span>
     </h1>
     <p class="hero-subtitle">
-      Etkinlikler, üyelikler, duyurular ve gönüllülük işlemlerini tek panelden hızlıca yönet.
+      Etkinlikler, üyelikler, duyurular ve gönüllülük işlemlerini tek panelden hızlıca yönet. Profesyonel topluluk deneyimiyle tanış.
     </p>
+
+    <!-- Dynamic Hero Announcement -->
+    {% if recent_announcements %}
+    <div class="hero-announcement" data-reveal-delay="350">
+      <i class="fa-solid fa-bell"></i> <strong>Duyuru:</strong> {{ recent_announcements.0.title }}
+      <a href="{% url 'announcement_detail' recent_announcements.0.pk %}" class="hero-announcement-link">Detay &rarr;</a>
+    </div>
+    {% endif %}
     <div class="hero-cta">
       {% if user.is_authenticated %}
         <a href="{% url 'community_list' %}" class="btn-hero-primary">
@@ -38,32 +52,99 @@
   </div>
 </section>
 
-<!-- Stats bar -->
-<div class="stats-bar">
-  <div class="stat-item">
-    <span class="stat-number" data-count="{{ community_count }}">{{ community_count }}</span>
-    <div class="stat-label">Aktif Topluluk</div>
-  </div>
-  <div class="stat-item">
-    <span class="stat-number" data-count="{{ event_count }}">{{ event_count }}</span>
-    <div class="stat-label">Etkinlik</div>
-  </div>
-  <div class="stat-item">
-    <span class="stat-number" data-count="{{ member_count }}">{{ member_count }}</span>
-    <div class="stat-label">Üye</div>
+<!-- Stats bar (Card Style) -->
+<div class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-card" data-reveal-delay="0">
+      <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" data-count="{{ community_count }}">{{ community_count }}</span>
+        <div class="stat-label">Aktif Topluluk</div>
+      </div>
+    </div>
+    <div class="stat-card" data-reveal-delay="150">
+      <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" data-count="{{ event_count }}">{{ event_count }}</span>
+        <div class="stat-label">Düzenlenen Etkinlik</div>
+      </div>
+    </div>
+    <div class="stat-card" data-reveal-delay="300">
+      <div class="stat-icon"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="stat-info">
+        <span class="stat-number" data-count="{{ member_count }}">{{ member_count }}</span>
+        <div class="stat-label">Mutlu Üye</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Main content -->
+<!-- How It Works Section -->
+<section class="how-it-works">
+  <div class="page-container">
+    <div class="section-header-center">
+      <h2 class="section-title-center">Nasıl Çalışır?</h2>
+      <p class="section-subtitle-center">Sadece üç adımda topluluk deneyimine dahil olun.</p>
+    </div>
+    <div class="steps-container">
+      <div class="step-card step-interactive" data-reveal-delay="0" onclick="window.location.href='{% url 'register_choice' %}'">
+        <div class="step-number">1</div>
+        <div class="step-icon"><i class="fa-solid fa-user-plus"></i></div>
+        <h3 class="step-title">Hesap Oluşturun</h3>
+        <p class="step-desc">Ücretsiz hesabınızı saniyeler içinde oluşturun ve profilinizi tamamlayın.</p>
+        <div class="step-action">Kayıt Ol <i class="fa-solid fa-arrow-right"></i></div>
+      </div>
+      <div class="step-card step-interactive" data-reveal-delay="150" onclick="openDynamicModal('communityModal')">
+        <div class="step-number">2</div>
+        <div class="step-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+        <h3 class="step-title">Topluluklara Katılın</h3>
+        <p class="step-desc">İlgi alanlarınıza uygun toplulukları keşfedin ve anında üye olun.</p>
+        <div class="step-action">Toplulukları Keşfet <i class="fa-solid fa-arrow-right"></i></div>
+      </div>
+      <div class="step-card step-interactive" data-reveal-delay="300" onclick="openDynamicModal('eventModal')">
+        <div class="step-number">3</div>
+        <div class="step-icon"><i class="fa-solid fa-calendar-days"></i></div>
+        <h3 class="step-title">Etkinliklere Katılın</h3>
+        <p class="step-desc">Düzenlenen etkinlikleri takip edin, biletinizi alın ve sosyalleşin.</p>
+        <div class="step-action">Etkinlik Bul <i class="fa-solid fa-arrow-right"></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features / Advantages Section -->
+<section class="features-section">
+  <div class="page-container">
+    <div class="features-grid">
+      <div class="feature-block" data-reveal-delay="0">
+        <div class="feature-icon"><i class="fa-solid fa-network-wired"></i></div>
+        <h3 class="feature-title">Güçlü Networking</h3>
+        <p class="feature-desc">Alanında uzman kişilerle ve benzer ilgi alanlarına sahip öğrencilerle tanışma fırsatı yakalayın.</p>
+      </div>
+      <div class="feature-block" data-reveal-delay="150">
+        <div class="feature-icon"><i class="fa-solid fa-medal"></i></div>
+        <h3 class="feature-title">Liderlik Becerileri</h3>
+        <p class="feature-desc">Topluluk yönetim kurullarında görev alarak organizasyon ve liderlik becerilerinizi geliştirin.</p>
+      </div>
+      <div class="feature-block" data-reveal-delay="300">
+        <div class="feature-icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+        <h3 class="feature-title">Gönüllülük Bilinci</h3>
+        <p class="feature-desc">Sosyal sorumluluk projelerinde aktif rol alarak çevrenize değer katmanın mutluluğunu yaşayın.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Main content (Events & Announcements) -->
 <div class="page-container">
 
   <!-- Recent Events -->
   {% if recent_events %}
-  <div style="margin-bottom:3rem;">
+  <div style="margin-bottom:4rem;">
     <h2 class="section-title"><i class="fa-solid fa-calendar-days" style="color:var(--primary)"></i> Yaklaşan Etkinlikler</h2>
     <div class="event-grid">
       {% for event in recent_events %}
-      <a href="{% url 'event_detail' event.pk %}" class="event-card">
+      <a href="{% url 'event_detail' event.pk %}" class="event-card" data-reveal-delay="{% widthratio forloop.counter0 1 100 %}">
         <div class="event-card-top">
           <div class="event-date-block">
             <div class="event-date-day">{{ event.event_date|date:"d" }}</div>
@@ -82,7 +163,7 @@
       </a>
       {% endfor %}
     </div>
-    <div style="text-align:center;margin-top:1.5rem;">
+    <div style="text-align:center;margin-top:2rem;">
       <a href="{% url 'event_list' %}" class="btn btn-outline">Tüm Etkinlikler <i class="fa-solid fa-arrow-right fa-sm"></i></a>
     </div>
   </div>
@@ -92,19 +173,21 @@
   {% if recent_announcements %}
   <div>
     <h2 class="section-title"><i class="fa-solid fa-bullhorn" style="color:var(--primary)"></i> Son Duyurular</h2>
-    <div class="announcement-list">
-      {% for ann in recent_announcements %}
-      <a href="{% url 'announcement_detail' ann.pk %}" class="announcement-card" style="text-decoration:none;color:inherit;">
-        <div class="announcement-title">{{ ann.title }}</div>
-        <div class="announcement-meta">
-          <span><i class="fa-regular fa-clock fa-xs"></i> {{ ann.created_at|date:"d M Y" }}</span>
-          {% if ann.community %}<span><i class="fa-solid fa-users fa-xs"></i> {{ ann.community.name }}</span>{% endif %}
-          {% if ann.is_global %}<span class="badge badge-primary">Genel</span>{% endif %}
-        </div>
-      </a>
-      {% endfor %}
+    <div class="announcements-wrapper">
+      <div class="announcement-list">
+        {% for ann in recent_announcements %}
+        <a href="{% url 'announcement_detail' ann.pk %}" class="announcement-card" style="text-decoration:none;color:inherit;" data-reveal-delay="{% widthratio forloop.counter0 1 100 %}">
+          <div class="announcement-title">{{ ann.title }}</div>
+          <div class="announcement-meta">
+            <span><i class="fa-regular fa-clock fa-xs"></i> {{ ann.created_at|date:"d M Y" }}</span>
+            {% if ann.community %}<span><i class="fa-solid fa-users fa-xs"></i> {{ ann.community.name }}</span>{% endif %}
+            {% if ann.is_global %}<span class="badge badge-primary">Genel</span>{% endif %}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
     </div>
-    <div style="text-align:center;margin-top:1.5rem;">
+    <div style="text-align:center;margin-top:2rem;">
       <a href="{% url 'announcement_list' %}" class="btn btn-outline">Tüm Duyurular <i class="fa-solid fa-arrow-right fa-sm"></i></a>
     </div>
   </div>
@@ -126,4 +209,30 @@
   {% endif %}
 
 </div>
+
+<!-- ── Modals ─────────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="communityModal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa-solid fa-users"></i> Önerilen Topluluklar</h3>
+      <button class="modal-close" onclick="closeDynamicModal('communityModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="communityModalBody">
+      <div class="modal-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Yükleniyor...</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="eventModal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title"><i class="fa-solid fa-calendar-check"></i> Yaklaşan Etkinlikler</h3>
+      <button class="modal-close" onclick="closeDynamicModal('eventModal')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body" id="eventModalBody">
+      <div class="modal-spinner"><i class="fa-solid fa-circle-notch fa-spin"></i> Yükleniyor...</div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

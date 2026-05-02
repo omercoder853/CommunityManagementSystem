@@ -13,6 +13,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   });
 
+  // ── Theme Toggle ─────────────────────────────────────────────────────────
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const darkIcon = document.querySelector('.dark-icon');
+  const lightIcon = document.querySelector('.light-icon');
+
+  function updateThemeIcons() {
+    if (!themeToggleBtn) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    if (darkIcon) darkIcon.style.display = isDark ? 'inline-block' : 'none';
+    if (lightIcon) lightIcon.style.display = isDark ? 'none' : 'inline-block';
+  }
+
+  if (themeToggleBtn) {
+    updateThemeIcons();
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcons();
+    });
+  }
+
+  // ── Hero Parallax & Cursor Glow ──────────────────────────────────────────
+  const heroSection = document.querySelector('.hero');
+  const heroGlow = document.querySelector('.hero-cursor-glow');
+  const heroShapes = document.querySelectorAll('.hero-shape');
+
+  if (heroSection) {
+    heroSection.addEventListener('mousemove', (e) => {
+      const rect = heroSection.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Move glow smoothly
+      if (heroGlow) {
+        heroGlow.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+      }
+
+      // Parallax shapes
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const moveX = (x - centerX) / 40;
+      const moveY = (y - centerY) / 40;
+
+      heroShapes.forEach((shape, index) => {
+        const factor = index === 0 ? 1 : (index === 1 ? -1.5 : 2);
+        shape.style.transform = `translate(${moveX * factor}px, ${moveY * factor}px)`;
+      });
+    });
+    
+    // Reset shapes on mouse leave
+    heroSection.addEventListener('mouseleave', () => {
+      heroShapes.forEach(shape => {
+        shape.style.transform = `translate(0px, 0px)`;
+      });
+      if (heroGlow) {
+        heroGlow.style.transform = `translate(50%, 50%) translate(-50%, -50%)`;
+      }
+    });
+  }
+
   // ── Navbar scroll shadow ─────────────────────────────────────────────────
   const navbar = document.querySelector('.navbar');
   if (navbar) {
@@ -78,22 +140,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Scroll-reveal for cards ──────────────────────────────────────────────
-  const revealEls = document.querySelectorAll('.community-card, .event-card, .announcement-card, .card');
+  const revealEls = document.querySelectorAll('.community-card, .event-card, .announcement-card, .card, .step-card, .feature-block, .stat-card');
   if (revealEls.length && 'IntersectionObserver' in window) {
     revealEls.forEach(el => {
       el.style.opacity = '0';
-      el.style.transform = 'translateY(18px)';
-      el.style.transition = 'opacity .45s ease, transform .45s ease';
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity .6s cubic-bezier(0.2, 0.8, 0.2, 1), transform .6s cubic-bezier(0.2, 0.8, 0.2, 1)';
     });
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
+          const delay = parseInt(entry.target.dataset.revealDelay || '0', 10);
+          setTimeout(() => {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }, delay);
           revealObserver.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
     revealEls.forEach(el => revealObserver.observe(el));
   }
 
@@ -154,4 +219,198 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // ── Notification Logic ──────────────────────────────────────────────────
+  const notifBtn = document.getElementById('notificationIconBtn');
+  const notifMenu = document.getElementById('notificationDropdownMenu');
+  const notifBadge = document.getElementById('notificationBadge');
+  const notifList = document.getElementById('notificationList');
+  const markReadBtn = document.getElementById('markNotificationsRead');
+
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = notifMenu.classList.contains('is-open');
+      notifMenu.classList.toggle('is-open', !isOpen);
+      notifBtn.setAttribute('aria-expanded', String(!isOpen));
+      if (!isOpen && notifList.innerHTML.includes('Yükleniyor')) {
+        fetchNotifications();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!notifMenu.contains(e.target) && e.target !== notifBtn) {
+        notifMenu.classList.remove('is-open');
+        notifBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    if (markReadBtn) {
+      markReadBtn.addEventListener('click', () => {
+        fetch('/api/notifications/read/', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json()).then(data => {
+          if(data.status === 'ok') {
+            if(notifBadge) notifBadge.style.display = 'none';
+            fetchNotifications();
+          }
+        });
+      });
+    }
+
+    // Initial fetch to show badge
+    fetchNotifications(true);
+  }
+
+  function fetchNotifications(badgeOnly=false) {
+    fetch('/api/notifications/')
+      .then(res => res.json())
+      .then(data => {
+        if(notifBadge) {
+          if (data.unread_count > 0) {
+            notifBadge.textContent = data.unread_count;
+            notifBadge.style.display = 'inline-block';
+          } else {
+            notifBadge.style.display = 'none';
+          }
+        }
+        
+        if (!badgeOnly && notifList) {
+          if (data.notifications.length === 0) {
+            notifList.innerHTML = '<div class="notification-empty" style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">Bildiriminiz bulunmuyor.</div>';
+            return;
+          }
+          let html = '';
+          data.notifications.forEach(n => {
+            const cls = n.is_read ? 'notification-item' : 'notification-item unread';
+            const link = n.link ? n.link : '#';
+            html += `<a href="${link}" class="${cls}">
+                      <div class="notification-message">${n.message}</div>
+                      <div class="notification-date">${n.date}</div>
+                     </a>`;
+          });
+          notifList.innerHTML = html;
+        }
+      })
+      .catch(err => console.error(err));
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
 });
+
+// ── Modals Logic ──────────────────────────────────────────────────────────
+function openDynamicModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.style.display = 'flex';
+    // Small delay to allow display:flex to apply before adding class for transition
+    setTimeout(() => {
+      modal.classList.add('is-active');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+
+    // Fetch data
+    if (modalId === 'communityModal') {
+      fetchCommunities();
+    } else if (modalId === 'eventModal') {
+      fetchEvents();
+    }
+  }
+}
+
+function closeDynamicModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('is-active');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300); // match CSS transition duration
+    document.body.style.overflow = '';
+  }
+}
+
+// Close modal on click outside
+window.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-overlay')) {
+    closeDynamicModal(e.target.id);
+  }
+});
+
+function fetchCommunities() {
+  const body = document.getElementById('communityModalBody');
+  fetch('/api/recommendations/communities/')
+    .then(res => res.json())
+    .then(data => {
+      if (data.communities.length === 0) {
+        body.innerHTML = '<div style="text-align:center; padding: 2rem;">Henüz topluluk bulunmuyor.</div>';
+        return;
+      }
+      let html = '';
+      data.communities.forEach(c => {
+        html += `<div class="dynamic-card">
+                  <div class="dynamic-card-title">${c.name}</div>
+                  <div class="dynamic-card-meta">
+                    <span><i class="fa-solid fa-user-tie fa-xs"></i> ${c.director}</span>
+                    <span><i class="fa-solid fa-users fa-xs"></i> ${c.member_count} Üye</span>
+                    <span><i class="fa-solid fa-calendar-plus fa-xs"></i> ${c.founded_date}</span>
+                  </div>
+                  <div class="dynamic-card-desc">${c.description}</div>
+                  <div style="margin-top: 1rem;">
+                    <a href="/communities/${c.id}/" class="btn-sm btn-outline">Detayları Gör <i class="fa-solid fa-arrow-right fa-xs"></i></a>
+                  </div>
+                 </div>`;
+      });
+      body.innerHTML = html;
+    })
+    .catch(err => {
+      body.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--danger);">Veri yüklenirken hata oluştu.</div>';
+    });
+}
+
+function fetchEvents() {
+  const body = document.getElementById('eventModalBody');
+  fetch('/api/recommendations/events/')
+    .then(res => res.json())
+    .then(data => {
+      if (data.events.length === 0) {
+        body.innerHTML = '<div style="text-align:center; padding: 2rem;">Yaklaşan etkinlik bulunmuyor.</div>';
+        return;
+      }
+      let html = '';
+      data.events.forEach(e => {
+        html += `<div class="dynamic-card">
+                  <div class="dynamic-card-title">${e.title}</div>
+                  <div class="dynamic-card-meta">
+                    <span><i class="fa-solid fa-users fa-xs"></i> ${e.community}</span>
+                    <span><i class="fa-solid fa-clock fa-xs"></i> ${e.date}</span>
+                    <span><i class="fa-solid fa-location-dot fa-xs"></i> ${e.location_type}</span>
+                  </div>
+                  <div class="dynamic-card-desc">${e.description}</div>
+                  <div style="margin-top: 1rem;">
+                    <a href="/events/${e.id}/" class="btn-sm btn-outline">Etkinliğe Git <i class="fa-solid fa-arrow-right fa-xs"></i></a>
+                  </div>
+                 </div>`;
+      });
+      body.innerHTML = html;
+    })
+    .catch(err => {
+      body.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--danger);">Veri yüklenirken hata oluştu.</div>';
+    });
+}

@@ -39,4 +39,10 @@ urlpatterns = [
     # ── Announcements ─────────────────────────────────────────────────────
     path('announcements/', views.announcement_list, name='announcement_list'),
     path('announcements/<int:pk>/', views.announcement_detail, name='announcement_detail'),
+
+    # ── API ───────────────────────────────────────────────────────────────
+    path('api/recommendations/communities/', views.api_recommend_communities, name='api_recommend_communities'),
+    path('api/recommendations/events/', views.api_recommend_events, name='api_recommend_events'),
+    path('api/notifications/', views.api_get_notifications, name='api_get_notifications'),
+    path('api/notifications/read/', views.api_mark_notifications_read, name='api_mark_notifications_read'),
 ]

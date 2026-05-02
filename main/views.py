@@ -7,7 +7,7 @@ from django.db.models import Q
 
 from .models import (
     CustomUser, Community, CommunityRequest, Member,
-    JoinRequest, Staff, Event, Announcement
+    JoinRequest, Staff, Event, Announcement, Notification
 )
 from .forms import (
     StudentRegisterForm, AdvisorRegisterForm, LoginForm,
@@ -209,6 +209,15 @@ def advisor_respond_request(request, req_id, action):
         comm_req.status = 'accepted'
         comm_req.responded_at = timezone.now()
         comm_req.save()
+
+        # Create global notification
+        users = CustomUser.objects.all()
+        notifications = [
+            Notification(recipient=user, message=f"Yeni bir topluluk kuruldu: {community.name}", link=f"/communities/{community.pk}/")
+            for user in users
+        ]
+        Notification.objects.bulk_create(notifications)
+
         send_request_accepted_email(comm_req.requester, comm_req.community_name)
         messages.success(request, f'"{comm_req.community_name}" topluluğu başarıyla kuruldu.')
     elif action == 'reject':
@@ -358,6 +367,15 @@ def event_create(request, comm_pk):
         event.community = community
         event.created_by = request.user
         event.save()
+
+        # Create global notification
+        users = CustomUser.objects.all()
+        notifications = [
+            Notification(recipient=user, message=f"Yeni bir etkinlik yayınlandı: {event.title} ({community.name})", link=f"/events/{event.pk}/")
+            for user in users
+        ]
+        Notification.objects.bulk_create(notifications)
+
         messages.success(request, 'Etkinlik oluşturuldu.')
         return redirect('event_detail', pk=event.pk)
     return render(request, 'events/create.html', {'form': form, 'community': community})
@@ -390,3 +408,56 @@ def announcement_create(request, comm_pk=None):
         messages.success(request, 'Duyuru yayınlandı.')
         return redirect('announcement_list')
     return render(request, 'announcements/create.html', {'form': form, 'community': community})
+
+
+# ─── API Endpoints ──────────────────────────────────────────────────────────
+from django.http import JsonResponse
+
+def api_recommend_communities(request):
+    communities = Community.objects.filter(is_active=True).order_by('-founded_date')[:3]
+    data = []
+    for c in communities:
+        data.append({
+            'id': c.pk,
+            'name': c.name,
+            'description': c.description[:100] + '...' if c.description else '',
+            'founded_date': c.founded_date.strftime('%d %b %Y'),
+            'director': c.director.get_full_name() if c.director else 'Bilinmiyor',
+            'member_count': c.members.count()
+        })
+    return JsonResponse({'communities': data})
+
+def api_recommend_events(request):
+    events = Event.objects.filter(is_active=True, event_date__gte=timezone.now()).order_by('event_date')[:3]
+    data = []
+    for e in events:
+        data.append({
+            'id': e.pk,
+            'title': e.title,
+            'community': e.community.name,
+            'date': e.event_date.strftime('%d %b %Y, %H:%M'),
+            'location_type': e.get_location_type_display(),
+            'description': e.description[:100] + '...' if e.description else ''
+        })
+    return JsonResponse({'events': data})
+
+@login_required
+def api_get_notifications(request):
+    notifs = Notification.objects.filter(recipient=request.user).order_by('-created_at')[:5]
+    unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    data = [{
+        'id': n.pk,
+        'message': n.message,
+        'link': n.link,
+        'is_read': n.is_read,
+        'date': n.created_at.strftime('%d %b %H:%M')
+    } for n in notifs]
+    return JsonResponse({'notifications': data, 'unread_count': unread_count})
+
+@login_required
+def api_mark_notifications_read(request):
+    if request.method == 'POST':
+        Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+        return JsonResponse({'status': 'ok'})
+    return JsonResponse({'status': 'error'}, status=400)
+

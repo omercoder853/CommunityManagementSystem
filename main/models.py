@@ -261,3 +261,25 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+
+# ─── Notification ───────────────────────────────────────────────────────────
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE,
+        related_name='notifications', verbose_name='Alıcı',
+    )
+    message = models.CharField(max_length=500, verbose_name='Mesaj')
+    link = models.CharField(max_length=500, blank=True, null=True, verbose_name='Bağlantı')
+    is_read = models.BooleanField(default=False, verbose_name='Okundu')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Bildirim'
+        verbose_name_plural = 'Bildirimler'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.recipient.username} - {self.message}"
+
